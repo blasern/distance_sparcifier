@@ -224,30 +224,43 @@ void print_usage_and_exit(int exit_code) {
 	exit(exit_code);
 }
 
-compressed_lower_distance_matrix farthest_point_sampling(compressed_lower_distance_matrix dist, int initial_point_index = 0) {
+compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_matrix dist,
+						   float interleaving_const = 1.0,
+						   int initial_point_index = 0) {
   /*
-  Farthest Point Sampling
+  Sparcify distance using farthest point sampling
 
   Parameters
   ==========
   compressed_lower_distance_matrix dist
     Original distance matrix
+  float interleaving_const
+    Desired interleaving constant (default: 1)
   int initial_point_index (default: 0)
     Index of point to start farthest point sampling with
 
   Return value
   ============
-  The transformed compressed_lower_distance_matrix
+  The sparcified compressed_lower_distance_matrix
   */
-  int n = dist.size();
+  if (interleaving_const == 1){
+    return dist;
+  }
+  // constants
+  const int n = dist.size();
+  const float inf = *max_element(dist.distances.begin(), dist.distances.end());
 
-  // initialize indices
+  // initialize indices and insertion radii
   std::vector<int> possible_indices(n-1);
   std::iota(possible_indices.begin(), possible_indices.end(), 1);
   std::vector<int> indices;
   indices.push_back(initial_point_index);
-
-  // find ordered indices
+  std::vector<float> insertion_radii;
+  std::vector<float> final_radii;
+  insertion_radii.push_back(inf);
+  final_radii.push_back(2.0 * inf / (1-interleaving_const));
+  
+  // find ordered indices and insertion radii
   while(indices.size() < n){
     std::vector<float> indices_dist;
     for (auto i : possible_indices){
@@ -264,104 +277,36 @@ compressed_lower_distance_matrix farthest_point_sampling(compressed_lower_distan
     int new_index = possible_indices.at(possible_index);
     possible_indices.erase(possible_indices.begin() + possible_index);
     indices.push_back(new_index);
+    final_radii.push_back(2.0 * insertion_radii.back() / (1 - interleaving_const));
+    insertion_radii.push_back(*std::max_element(indices_dist.begin(), indices_dist.end()));
   }
 
-  // update distance
-  std::vector<float> new_dist;
+  // update fps distance
+  std::vector<float> fps_dist;
   std::vector<int> subindices = indices;
   for (auto i : indices){
     subindices.erase(subindices.begin());
     if (subindices.size() > 0){
       for (auto j : subindices){
-	new_dist.push_back(dist(i, j));
+	fps_dist.push_back(dist(i, j));
       }
     }
   }
 
-  // return updated distance
-  return compressed_lower_distance_matrix(compressed_upper_distance_matrix(std::move(new_dist)));
-}
-
-std::vector<float> find_break_times(compressed_lower_distance_matrix dist,
-			       float interleaving_const){
-  /*
-  Find break times based on the distance and the desired interleaving constant.
-  // In this preliminary version the break times are fixed regular sequences.
-  // Later this will be based on Cavanna, Jahanseir, Sheehy
-  // (https://arxiv.org/pdf/1506.03797.pdf)
-  // or some other algorithm.
-
-  Parameters
-  ==========
-  compressed_lower_distance_matrix dist
-    Distance matrix coming from farthest point sampling
-  float interleaving_const
-    Desired interleaving constant
-
-  Return value
-  ============
-  Vector of break times.
-  */
-
-  float interleaving_overlap = interleaving_const / (interleaving_const - 1);
-  float diam = dist(0, 1);
-
-  std::vector<float> break_times;
-
-  for (int i = 1; i < 10; ++i){
-    break_times.push_back(diam*i/10);
-  }
-
-  return break_times;
-}
-
-compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_matrix dist,
-						   std::vector<float> break_points,
-						   float interleaving_const) {
-  /*
-  Farthest Point Sampling
-
-  Parameters
-  ==========
-  compressed_lower_distance_matrix dist
-    Distance matrix coming from farthest point sampling
-  vector<float> break_points
-    Vector of break times
-  float interleaving_const
-    Desired interleaving constant
-
-  Return value
-  ============
-  The sparcified compressed_lower_distance_matrix
-  */
-  int n = dist.size();
-  float interleaving_overlap = interleaving_const / (interleaving_const - 1);
-
-  std::vector<float> distances = dist.distances;
-
-  // float inf = std::numeric_limits<float>::infinity();
-  float inf = *max_element(distances.begin(), distances.end());
-
-  for (int i = 1; i < n; ++i){
-    std::vector<float>::iterator start = distances.begin() + i * (i-1) / 2;
-    std::vector<float>::iterator end = start + i;
-    std::vector<float> i_dist(start, end);
-
-    float min = *min_element(i_dist.begin(), i_dist.end());
-
-    for (auto break_point : break_points){
-      if (min < break_point/interleaving_overlap){
-	for (std::vector<float>::iterator it = start; it != end; ++it){
-	  if (*it > break_point){
-	    *it = inf;
-	  }
-	}
-	break;
+  // update distances
+  for (int i = 0; i < n; ++i){
+    for (int j = 0; j < i; ++j){\
+      int ij = j + (i * (i - 1)) / 2;
+      float dij = fps_dist.at(ij);
+      if (dij > final_radii.at(i) | dij > final_radii.at(j)){
+	fps_dist.at(ij) = inf;
       }
     }
   }
 
-  return compressed_lower_distance_matrix(std::move(distances));
+  // return sparse distance
+  compressed_lower_distance_matrix spdist = compressed_lower_distance_matrix(compressed_upper_distance_matrix(std::move(fps_dist)));
+  return spdist;
 }
 
 int main(int argc, char** argv) {
@@ -370,12 +315,17 @@ int main(int argc, char** argv) {
 
 	file_format format = DISTANCE_MATRIX;
 
-	float interleaving = 2;
+	float interleaving = 1.0;
 
 	for (index_t i = 1; i < argc; ++i) {
 		const std::string arg(argv[i]);
 		if (arg == "--help") {
 			print_usage_and_exit(0);
+		} else if (arg == "--interleaving") {
+		  std::string parameter = std::string(argv[++i]);
+		  size_t next_pos;
+		  interleaving = std::stof(parameter, &next_pos);
+		  if (next_pos != parameter.size()) print_usage_and_exit(-1);
 		} else if (arg == "--format") {
 			std::string parameter = std::string(argv[++i]);
 			if (parameter == "lower-distance")
@@ -390,11 +340,6 @@ int main(int argc, char** argv) {
 				format = DIPHA;
 			else
 				print_usage_and_exit(-1);
-		} else if (arg == "--interleaving") {
-			std::string parameter = std::string(argv[++i]);
-			size_t next_pos;
-			interleaving = std::stol(parameter, &next_pos);
-			//if (next_pos != parameter.size()) print_usage_and_exit(-1);
 		} else {
 			if (filename) { print_usage_and_exit(-1); }
 			filename = argv[i];
@@ -416,15 +361,8 @@ int main(int argc, char** argv) {
 	auto value_range = std::minmax_element(dist.distances.begin(), dist.distances.end());
 	// std::cout << "value range: [" << *value_range.first << "," << *value_range.second << "]" << std::endl;
 
-	// farthest point sampling
-	compressed_lower_distance_matrix fps_dist = farthest_point_sampling(dist);
-
-	// get break points
-	std::vector<float> break_times = find_break_times(fps_dist, interleaving);
-
 	// sparcify distance matrix
-	compressed_lower_distance_matrix sparse_dist = sparcify_distance(fps_dist,
-									 break_times,
+	compressed_lower_distance_matrix sparse_dist = sparcify_distance(dist,
 									 interleaving);
 
 	// output sparse distance matrix
@@ -436,3 +374,4 @@ int main(int argc, char** argv) {
 	}
 
 }
+
