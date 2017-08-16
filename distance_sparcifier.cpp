@@ -116,7 +116,7 @@ compressed_lower_distance_matrix read_point_cloud(std::istream& input_stream) {
 
 	index_t n = eucl_dist.size();
 
-	std::cout << "point cloud with " << n << " points in dimension " << eucl_dist.points.front().size() << std::endl;
+	// std::cout << "point cloud with " << n << " points in dimension " << eucl_dist.points.front().size() << std::endl;
 
 	std::vector<value_t> distances;
 
