@@ -1,7 +1,7 @@
 # distance_sparcifier
 
 ### Description
-distance_sparcifier is a C++ code to sparcify distance matrices as a preprocessing step for the computation of sparse Vietoris-Rips persistence barcodes. 
+distance_sparcifier is a C++ code to sparcify distance matrices as a preprocessing step for the computation of sparse Vietoris-Rips persistence barcodes. Sparcification is based on [Cavanna et al](https://arxiv.org/abs/1506.03797).
 The code for reading distance matrices, the help and the examples are based on [Ripser](https://github.com/Ripser). 
 
 ### Building
