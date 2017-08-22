@@ -218,7 +218,7 @@ void print_usage_and_exit(int exit_code) {
 	          << "                     distance       (full distance matrix)" << std::endl
 	          << "                     point-cloud    (point cloud in Euclidean space)" << std::endl
 	          << "                     dipha          (distance matrix in DIPHA file format)" << std::endl
-	          << "  --interleaving   interleaving constant" << std::endl
+	          << "  --interleaving   interleaving constant >= 1" << std::endl
 	          << std::endl;
 
 	exit(exit_code);
@@ -249,6 +249,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
   // constants
   const int n = dist.size();
   const float inf = *max_element(dist.distances.begin(), dist.distances.end());
+  const float delta = 1/interleaving_const;
 
   // initialize indices and insertion radii
   std::vector<int> possible_indices(n-1);
@@ -258,7 +259,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
   std::vector<float> insertion_radii;
   std::vector<float> final_radii;
   insertion_radii.push_back(inf);
-  final_radii.push_back(2.0 * inf / (1-interleaving_const));
+  final_radii.push_back(2.0 * inf / (1-delta));
   
   // find ordered indices and insertion radii
   while(indices.size() < n){
@@ -277,7 +278,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
     int new_index = possible_indices.at(possible_index);
     possible_indices.erase(possible_indices.begin() + possible_index);
     indices.push_back(new_index);
-    final_radii.push_back(2.0 * insertion_radii.back() / (1 - interleaving_const));
+    final_radii.push_back(2.0 * insertion_radii.back() / (1 - delta));
     insertion_radii.push_back(*std::max_element(indices_dist.begin(), indices_dist.end()));
   }
 
@@ -324,8 +325,9 @@ int main(int argc, char** argv) {
 		} else if (arg == "--interleaving") {
 		  std::string parameter = std::string(argv[++i]);
 		  size_t next_pos;
-		  interleaving = std::stof(parameter, &next_pos);
+		  interleaving = std::stof(parameter, &next_pos);		 
 		  if (next_pos != parameter.size()) print_usage_and_exit(-1);
+		  if (interleaving < 1) print_usage_and_exit(-1);
 		} else if (arg == "--format") {
 			std::string parameter = std::string(argv[++i]);
 			if (parameter == "lower-distance")
