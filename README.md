@@ -30,15 +30,15 @@ make
 Here is how to run distance_sparcifier and writing the output to a lower distance matrix file:
 
 ```sh
-./distance_sparcifier --interleaving 0.5 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_0.5.lower_distance_matrix
-./distance_sparcifier --interleaving 0.3 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_0.3.lower_distance_matrix
-./distance_sparcifier --interleaving 0.1 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_0.1.lower_distance_matrix
+./distance_sparcifier --interleaving 1.2 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_1.2.lower_distance_matrix
+./distance_sparcifier --interleaving 2.0 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_2.0.lower_distance_matrix
+./distance_sparcifier --interleaving 5.0 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_5.0.lower_distance_matrix
 ```
 
 After this preprocessing step, run ripser as usual: 
 ```sh
 ./ripser examples/sphere_3_192.lower_distance_matrix
-./ripser examples/sphere_3_192_sparse_0.5.lower_distance_matrix 
-./ripser examples/sphere_3_192_sparse_0.3.lower_distance_matrix
-./ripser examples/sphere_3_192_sparse_0.1.lower_distance_matrix
+./ripser examples/sphere_3_192_sparse_1.2.lower_distance_matrix 
+./ripser examples/sphere_3_192_sparse_2.0.lower_distance_matrix
+./ripser examples/sphere_3_192_sparse_5.0.lower_distance_matrix
 ```
