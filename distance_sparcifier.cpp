@@ -278,7 +278,6 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
     int new_index = possible_indices.at(possible_index);
     possible_indices.erase(possible_indices.begin() + possible_index);
     indices.push_back(new_index);
-    final_radii.push_back(2.0 * insertion_radii.back() / (1 - delta));
     insertion_radii.push_back(*std::max_element(indices_dist.begin(), indices_dist.end()));
   }
 
@@ -296,10 +295,10 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
 
   // update distances
   for (int i = 0; i < n; ++i){
-    for (int j = 0; j < i; ++j){\
+    for (int j = 0; j < i; ++j){
       int ij = j + (i * (i - 1)) / 2;
       float dij = fps_dist.at(ij);
-      if (dij > final_radii.at(i) | dij > final_radii.at(j)){
+      if (dij > (insertion_radii.at(i) + insertion_radii.at(j))/(1+delta)){
 	fps_dist.at(ij) = inf;
       }
     }

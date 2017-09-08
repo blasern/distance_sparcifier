@@ -1,19 +1,19 @@
 # distance_sparcifier
 
-### Description
-distance_sparcifier is a C++ code to sparcify distance matrices as a preprocessing step for the computation of sparse Vietoris-Rips persistence barcodes. The code for reading distance matrices, the help and the examples are based on [Ripser](https://github.com/Ripser). 
+### Description 
+distance_sparcifier is a C++ code to sparcify distance
+matrices as a preprocessing step for the computation of sparse
+Vietoris-Rips persistence barcodes. The code for reading distance
+matrices, the help and the examples are based on
+[Ripser](https://github.com/Ripser).
 
-Sparcification is based on
-[Cavanna et al](https://arxiv.org/abs/1506.03797). Let P be a furthest
-point sampling of a point cloud with insertion radii λi. Given an
-interleaving constant c of at least 1.0, we define δ = 1/c and radii
-r0 = r1 = ∞ and ri = 2λ_{i−1} /(1 − δ ) for i = 2, ... , n.
-In order to sparsify the edge list for the full Rips complex we set
-the distance between every edge (i, j) with d(i, j) ≥ min(ri , rj) to
-the maximal distance in P.
-Using distance sparcifier together with a Cech complex, leads to
-c-interleaved complexes and using it together with a Rips complex
-leads to (2c-1)-interleaved complexes. 
+Sparcification is based on [Cavanna et al](https://arxiv.org/abs/1506.03797). Let P be a furthest point
+sampling of a point cloud with insertion radii λi. Given an
+interleaving constant c of at least 1.0, we define δ = 1/c.  In order
+to sparsify the edge list for the full Rips complex we set the
+distance between every edge (i, j) with d(i, j) ≥ (λi + λj)/(1 - δ) to the
+maximal distance in P.  Using distance sparcifier together with a
+Rips complex leads to c-interleaved complexes.
 
 ### Building
 
