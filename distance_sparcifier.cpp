@@ -257,9 +257,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
   std::vector<int> indices;
   indices.push_back(initial_point_index);
   std::vector<float> insertion_radii;
-  std::vector<float> final_radii;
   insertion_radii.push_back(inf);
-  final_radii.push_back(2.0 * inf / (1-delta));
   
   // find ordered indices and insertion radii
   while(indices.size() < n){
@@ -298,7 +296,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
     for (int j = 0; j < i; ++j){
       int ij = j + (i * (i - 1)) / 2;
       float dij = fps_dist.at(ij);
-      if (dij > (insertion_radii.at(i) + insertion_radii.at(j))/(1+delta)){
+      if (dij > (insertion_radii.at(i) + insertion_radii.at(j))/(1-delta)){
 	fps_dist.at(ij) = inf;
       }
     }
