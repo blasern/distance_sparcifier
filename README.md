@@ -1,23 +1,33 @@
 # distance_sparcifier
 
 ### Description 
-distance_sparcifier is a C++ code to sparcify distance
+`distance_sparcifier` is a `C++` code to sparcify distance
 matrices as a preprocessing step for the computation of sparse
 Vietoris-Rips persistence barcodes. The code for reading distance
 matrices, the help and the examples are based on
-[Ripser](https://github.com/Ripser).
+[`Ripser`](https://github.com/Ripser).
 
 Sparcification is based on [Cavanna et al](https://arxiv.org/abs/1506.03797). Let P be a furthest point
 sampling of a point cloud with insertion radii λi. Given an
-interleaving constant c of at least 1.0, we define δ = 1/c.  In order
-to sparsify the edge list for the full Rips complex we set the
-distance between every edge (i, j) with d(i, j) ≥ (λi + λj)/(1 - δ) to the
-maximal distance in P.  Using distance sparcifier together with a
-Rips complex leads to c-interleaved complexes.
+interleaving constant c of at least 1.0, we sparsify the edge list for the full Rips complex. First let
+
+![p^c(x,y) = c \min \{\lambda_x, \lambda_y \}/(c-1)](http://www.sciweavers.org/upload/Tex2Img_1507791208/render.png)
+
+and then set the new distances
+
+![d^c(x,y) =
+  \begin{cases}
+    d(x,y) & \text{if \(d(x,y) \le 2p^c(x,y)\)} \\
+    2(d(x,y) - p^c(x,y)) & \text{if \(2p^c(x,y) \le d(x,y) \le (c+1)p^c(x,y)\)}\\
+    \infty & \text{otherwise} 
+  \end{cases}
+](http://www.sciweavers.org/upload/Tex2Img_1507790898/render.png)
+
+Note that the last term should be infinite, but we use twice the maximum distance because infinity cannot be read by `Ripser`. Using `distance_sparcifier` together with `Ripser` leads to c-interleaved persistence diagrams.
 
 ### Building
 
-distance_sparcifier requires a C++11 compiler. Here is how to obtain and build distance_sparcifier:
+`distance_sparcifier` requires a C++11 compiler. Here is how to obtain and build `distance_sparcifier`:
 
 ```sh
 git clone https://github.com/blasern/distance_sparcifier
@@ -27,7 +37,7 @@ make
 
 ### Use
 
-Here is how to run distance_sparcifier and writing the output to a lower distance matrix file:
+Here is how to run `distance_sparcifier` and writing the output to a lower distance matrix file:
 
 ```sh
 ./distance_sparcifier --interleaving 1.2 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_1.2.lower_distance_matrix
@@ -35,7 +45,7 @@ Here is how to run distance_sparcifier and writing the output to a lower distanc
 ./distance_sparcifier --interleaving 5.0 examples/sphere_3_192.lower_distance_matrix > examples/sphere_3_192_sparse_5.0.lower_distance_matrix
 ```
 
-After this preprocessing step, run ripser as usual: 
+After this preprocessing step, run `Ripser` as usual: 
 ```sh
 ./ripser examples/sphere_3_192.lower_distance_matrix
 ./ripser examples/sphere_3_192_sparse_1.2.lower_distance_matrix 
