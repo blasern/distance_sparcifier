@@ -248,8 +248,7 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
   }
   // constants
   const int n = dist.size();
-  const float inf = *max_element(dist.distances.begin(), dist.distances.end());
-  const float delta = 1/interleaving_const;
+  const float inf = *max_element(dist.distances.begin(), dist.distances.end()) * 2.0;
 
   // initialize indices and insertion radii
   std::vector<int> possible_indices(n-1);
@@ -295,8 +294,13 @@ compressed_lower_distance_matrix sparcify_distance(compressed_lower_distance_mat
   for (int i = 0; i < n; ++i){
     for (int j = 0; j < i; ++j){
       int ij = j + (i * (i - 1)) / 2;
+      float pij = interleaving_const / (interleaving_const - 1) *
+	std::min(insertion_radii.at(i), insertion_radii.at(j)); 
       float dij = fps_dist.at(ij);
-      if (dij > (insertion_radii.at(i) + insertion_radii.at(j))/(1-delta)){
+      if (dij > 2*pij){
+	fps_dist.at(ij) = 2*(dij-pij);
+      }
+      if (dij > (interleaving_const+1)*pij){
 	fps_dist.at(ij) = inf;
       }
     }
