@@ -11,7 +11,7 @@ Sparcification is based on [Cavanna et al](https://arxiv.org/abs/1506.03797). Le
 sampling of a point cloud with insertion radii λi. Given an
 interleaving constant c of at least 1.0, we sparsify the edge list for the full Rips complex. First let
 
-![p^c(x,y) = \frac{c}{c-1}  \min \{\lambda_x, \lambda_y \}](formulas/pc.png)
+<img alt="p^c(x,y) = \frac{c}{c-1}  \min \{\lambda_x, \lambda_y \}" src="formulas/pc.png" height="50">
 
 and then set the new distances
 
