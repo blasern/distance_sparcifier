@@ -11,7 +11,7 @@ Sparcification is based on [Cavanna et al](https://arxiv.org/abs/1506.03797). Le
 sampling of a point cloud with insertion radii λi. Given an
 interleaving constant c of at least 1.0, we sparsify the edge list for the full Rips complex. First let
 
-![p^c(x,y) = c \min \{\lambda_x, \lambda_y \}/(c-1)](http://www.sciweavers.org/upload/Tex2Img_1507791208/render.png)
+![p^c(x,y) = \frac{c}{c-1}  \min \{\lambda_x, \lambda_y \}](formulas/pc.png)
 
 and then set the new distances
 
@@ -19,11 +19,11 @@ and then set the new distances
   \begin{cases}
     d(x,y) & \text{if \(d(x,y) \le 2p^c(x,y)\)} \\
     2(d(x,y) - p^c(x,y)) & \text{if \(2p^c(x,y) \le d(x,y) \le (c+1)p^c(x,y)\)}\\
-    \infty & \text{otherwise} 
-  \end{cases}
-](http://www.sciweavers.org/upload/Tex2Img_1507790898/render.png)
+    2 \max_{p, q \in P}{d(p, q)} & \text{otherwise} 
+  \end{cases}}
+](formulas/dc.png)
 
-Note that the last term should be infinite, but we use twice the maximum distance because infinity cannot be read by `Ripser`. Using `distance_sparcifier` together with `Ripser` leads to c-interleaved persistence diagrams.
+Note that the last term should be infinite, but we use twice the maximum distance because infinity cannot be read by `Ripser`. Using `distance_sparcifier` together with `Ripser` leads to c-interleaved persistence diagrams. Remember to use a threshold between the maximum distance and twice the maximum distance for the sparsification to save time. 
 
 ### Building
 
